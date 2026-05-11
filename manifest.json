@@ -1,0 +1,10 @@
+{
+  "id": "toolzer",
+  "name": "Toolzer",
+  "version": "1.6.1",
+  "minAppVersion": "1.0.0",
+  "description": "Swiss-knife UI toolkit: scroll, fonts, spacing, highlights, themes, paper textures, reading tools and more.",
+  "author": "Bogdan Mykhailyk",
+  "authorUrl": "https://github.com/blindshen14",
+  "isDesktopOnly": false
+}
