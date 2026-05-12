@@ -142,7 +142,7 @@ Building next: `Screen Translator`
 
 If Toolzer ended up useful for you and you want to support more small tools like this, you can leave a donation here:
 
-[Support Toolzer via PayPal](https://www.paypal.com/donate/?hosted_button_id=Z39L48YFQ7G8J)
+[Support Toolzer via PayPal](https://www.paypal.com/donate/?hosted_button_id=WTT5WN4S67644)
 
 ## Notes
 
