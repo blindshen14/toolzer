@@ -42,6 +42,10 @@ The problem was friction.
 
 Toolzer is my attempt to make those adjustments feel immediate, local, and pleasant enough that you actually use them.
 
+I did not make it as a startup product or as some grand productivity system. I made it because I spend a lot of time inside Obsidian, and I wanted the app to feel more comfortable, more flexible, and a little more mine.
+
+That is also the general logic behind most things I build: I usually make small tools for myself first, then share them if they turn out genuinely useful for other people too.
+
 ## Screenshots
 
 ### Overview
@@ -133,6 +137,12 @@ Right now Toolzer is set up as a manual install plugin.
 Currently shipping: `Toolzer`
 
 Building next: `Screen Translator`
+
+## Support
+
+If Toolzer ended up useful for you and you want to support more small tools like this, you can leave a donation here:
+
+[Support Toolzer via PayPal](https://www.paypal.com/donate/?hosted_button_id=Z39L48YFQ7G8J)
 
 ## Notes
 
