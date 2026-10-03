@@ -125,9 +125,11 @@ They are there for the same reason as everything else in Toolzer: quick local co
 
 ## Install
 
-Right now Toolzer is set up as a manual install plugin.
+Toolzer is currently available for desktop Obsidian 1.13.7 or newer. The community-directory submission is the next step.
 
-1. Download the release files.
+Open the panel using the `Toolzer: Open toolkit` command or the status-bar button. The interface supports English and Ukrainian.
+
+1. Download `main.js` and `manifest.json` from the [latest release](https://github.com/blindshen14/toolzer/releases/latest).
 2. Create a folder named `toolzer` inside your vault at `.obsidian/plugins/`.
 3. Put `manifest.json` and `main.js` into that folder.
 4. Reload Obsidian and enable `Toolzer` in Community Plugins.
@@ -149,3 +151,17 @@ If Toolzer ended up useful for you and you want to support more small tools like
 - Tested as a practical personal-use plugin first, then cleaned up for release.
 - Some features depend on your installed fonts, active theme, and current Obsidian setup.
 - The plugin is meant to stay lightweight and useful, not turn into an overbuilt platform.
+
+## Privacy and compatibility
+
+Toolzer runs locally and does not send note content or usage data to external services. Icons use the built-in Obsidian icon library. Personal settings, markers, and presets stay in your vault's plugin `data.json` and are excluded from this repository.
+
+Desktop is the supported platform for this release. Theme-dependent styling and pop-out windows may vary; mobile support has not been validated.
+
+## Feedback
+
+[Report a bug or request a feature](https://github.com/blindshen14/toolzer/issues). Include your Obsidian version, theme, and steps to reproduce. Avoid uploading private vault content.
+
+## License
+
+[MIT](LICENSE), copyright Bogdan Mykhailyk.

@@ -1,7 +1,7 @@
-/* TOOLZER v1.6.1
+/* TOOLZER v1.6.2
    Swiss-knife UI toolkit for Obsidian (UPDATED WITH FIXES)
 */
-const { Plugin, PluginSettingTab, Setting, Notice, MarkdownView } = require('obsidian');
+const { Plugin, PluginSettingTab, Setting, Notice, MarkdownView, setIcon } = require('obsidian');
 
 const I18N = {
   en: {
@@ -247,15 +247,17 @@ class ToolzerPlugin extends Plugin {
     this.statusBarEl.setText('⚙ toolzer');
     this.statusBarEl.style.cursor = 'pointer';
     this.statusBarEl.title = 'Toolzer';
-    this.statusBarEl.addEventListener('click', () => this.togglePopup());
+    this.registerDomEvent(this.statusBarEl, 'click', () => this.togglePopup());
+    this.addCommand({ id: 'open-toolkit', name: 'Open toolkit', callback: () => this.togglePopup() });
     this.addSettingTab(new ToolzerSettingTab(this.app, this));
     this.registerEvent(this.app.workspace.on('layout-change', () => this.attachScrollHandlers()));
     this.attachScrollHandlers();
   }
 
   onunload() {
+    this.closePopup();
     this.detachScrollHandlers();
-    ['width','font','spacing','typesize','highlight','headings','bullet','textcolor','sepia','paper','markers','images','tasks','columns'].forEach(id=>removeStyle('tz-'+id));
+    ['width','font','spacing','typesize','highlight','headings','bullet','textcolor','sepia','paper','markers','images','tasks','columns','popup-shell'].forEach(id=>removeStyle('tz-'+id));
     if(this.rulerEl) { this.rulerEl.remove(); this.rulerEl=null; }
     if(this._rulerMove) { document.removeEventListener('mousemove', this._rulerMove); this._rulerMove=null; }
     if(this.progEl) { this.progEl.remove(); this.progEl=null; }
@@ -435,20 +437,19 @@ class ToolzerPlugin extends Plugin {
   getVisibleTabs(){const order=this.settings.tabOrder||ALL_TAB_IDS;const visible=this.settings.visibleTabs||ALL_TAB_IDS;return order.filter(id=>visible.includes(id));}
   openSettings(){this.app.setting.open();this.app.setting.openTabById('toolzer');}
 
-  togglePopup(){const ex=document.getElementById('tz-popup');if(ex){ex.remove();return;}this.openPopup();}
+  closePopup(){
+    clearTimeout(this.popupClickTimer);
+    if(this.popupOutsideClick) document.removeEventListener('click',this.popupOutsideClick);
+    this.popupOutsideClick=null;
+    document.getElementById('tz-popup')?.remove();
+  }
+  togglePopup(){if(document.getElementById('tz-popup')){this.closePopup();return;}this.openPopup();}
 
   openPopup(){
     const rect=this.statusBarEl.getBoundingClientRect();
     const popup=document.createElement('div');
     popup.id='tz-popup';
     const pw=this.settings.popupWidth||DEFAULTS.popupWidth;
-    if(!document.getElementById('tz-material-symbols-link')){
-      const link=document.createElement('link');
-      link.id='tz-material-symbols-link';
-      link.rel='stylesheet';
-      link.href='https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block';
-      document.head.appendChild(link);
-    }
     injectStyle('tz-popup-shell', `
       #tz-popup, #tz-popup * { box-sizing:border-box; }
       #tz-popup{
@@ -549,7 +550,7 @@ class ToolzerPlugin extends Plugin {
     const langBtn=hLeft.createEl('button',{text:t.langSwitch});
     Object.assign(langBtn.style,{padding:'2px 8px',fontSize:'10px',cursor:'pointer',border:'1px solid rgba(68,70,85,.35)',background:'var(--tz-surface-high)',color:'var(--tz-primary)',borderRadius:'2px',fontFamily:'"Space Grotesk","Azeret Mono","Noto Sans Mono",monospace',letterSpacing:'0.06em'});
     langBtn.onclick=async()=>{this.settings.lang=this.settings.lang==='en'?'ua':'en';await this.saveSettings();popup.remove();this.openPopup();};
-    const version=hLeft.createEl('span',{text:'v1.6'});
+    const version=hLeft.createEl('span',{text:'v'+this.manifest.version});
     Object.assign(version.style,{fontSize:'9px',color:'var(--tz-faint)',padding:'1px 5px',border:'1px solid rgba(68,70,85,.35)',fontFamily:'"Space Grotesk","Azeret Mono","Noto Sans Mono",monospace',textTransform:'uppercase',letterSpacing:'0.08em'});
     const hRight=header.createEl('div');
     Object.assign(hRight.style,{display:'flex',alignItems:'center',gap:'6px'});
@@ -626,7 +627,9 @@ class ToolzerPlugin extends Plugin {
         const btn=sidebar.createEl('button');
         btn.className='tz-tab';btn.dataset.id=id;btn.title=t.tabTitles[id];
         Object.assign(btn.style,{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'3px',width:'100%',padding:'9px 4px',border:'none',borderLeft:'2px solid transparent',cursor:'pointer',background:'transparent',color:'var(--tz-muted)',position:'relative'});
-        const icon=btn.createEl('span',{text:t.tabs[id]});
+        const icon=btn.createEl('span');
+        const icons={scroll:'arrow-down-up',width:'move-horizontal',font:'type',spacing:'list',size:'a-large-small',highlight:'highlighter',markers:'map-pin',headings:'heading-1',emoji:'smile',bullet:'list',color:'palette',night:'moon',paper:'file-text',themes:'palette',presets:'sliders-horizontal',images:'image',tasks:'square-check',columns:'columns-2',reader:'book-open'};
+        setIcon(icon,icons[id]||'settings');
         icon.className='tz-icon';
         icon.style.cssText='font-size:20px;line-height:1;';
         btn.createEl('span',{text:t.tabTitles[id]}).style.cssText='font-size:8px;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:"Space Grotesk","Azeret Mono","Noto Sans Mono",monospace;letter-spacing:.08em;text-transform:uppercase;';
@@ -648,7 +651,8 @@ class ToolzerPlugin extends Plugin {
     const activeTab=visibleTabs.includes(this.settings.activeTab)?this.settings.activeTab:visibleTabs[0];
     renderTab(activeTab);
 
-    setTimeout(()=>{document.addEventListener('click',(e)=>{if(!popup.contains(e.target)&&e.target!==this.statusBarEl)popup.remove();},{once:true});},100);
+    this.popupOutsideClick=(e)=>{if(!popup.contains(e.target)&&!this.statusBarEl.contains(e.target))this.closePopup();};
+    this.popupClickTimer=setTimeout(()=>document.addEventListener('click',this.popupOutsideClick),100);
     document.body.appendChild(popup);
   }
 
